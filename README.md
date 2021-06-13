@@ -39,3 +39,11 @@ Duolingo is constantly making small changes and tweaks in the website. When it h
 1. If you are a developer and can fix the problem yourself, please submit a patch.
 2. Otherwise, be patient. I'll work on it as soon as possible.
 
+### Contributors
+
+The main developper is me, @camiloaa.
+Original code by [@guillaumebrunerie](https://github.com/guillaumebrunerie/reversetreeenhancer).
+Web Speech support by [@eshloraque](https://github.com/eshloraque/).
+Class detection by [@eva-neduchalova](https://github.com/eva-neduchalova).
+Bug fixes by @Markussss, @AbsolutelyFreeWeb and @ellemcfarlane.
+

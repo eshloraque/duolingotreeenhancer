@@ -773,6 +773,62 @@ function challengeComplete(challenge) {
 
 }
 
+/* Tap missing words */
+function challengeTapComplete(challenge) {
+    //log("challengeTapComplete");
+
+    // log("challengeTapComplete from "+question+" to "+answer);
+    if (/answer/.test(activeClass)) {
+        //log("We have an answer");
+        revealElements();
+        if (isSayText(targetLang)) {
+            // Read the answer aloud if necessary
+            var grade = getFirstAnswerInFooter();
+            if (/answer-correct/.test(activeClass)) { // Answer is right
+                //log("You were right");
+                var full_sentence = getHintSentence().parentNode;
+                say(full_sentence, targetLang);
+            } else {
+                //log("You made a mistake");
+                say(grade, targetLang);
+            }
+        }
+    } else {
+        // Nothing to do here
+    }
+
+}
+
+/* Tap missing endings */
+function challengeTapCloze(challenge) {
+    //log("challengeTapCloze");
+
+    // log("challengeTapComplete from "+question+" to "+answer);
+    if (/answer/.test(activeClass)) {
+        //log("We have an answer");
+        revealElements();
+        if (isSayText(targetLang)) {
+            // Read the answer aloud if necessary
+            var grade = getFirstAnswerInFooter();
+            if (/answer-correct/.test(activeClass)) { // Answer is right
+                //log("You were right");
+                var full_sentence = getHintSentence().parentNode;
+                var elements_to_remove = full_sentence.getElementsByClassName("_70ERZ");
+                for (var i = elements_to_remove.length - 1; i >= 0; i--) {
+                    elements_to_remove[i].remove();
+                }
+                say(full_sentence, targetLang);
+            } else {
+                //log("You made a mistake");
+                say(grade, targetLang);
+            }
+        }
+    } else {
+        // Nothing to do here
+    }
+
+}
+
 /* Select the correct image */
 function challengeSelect(challenge) {
     // log("challengeSelect");
@@ -828,7 +884,7 @@ function challengeForm(challenge) {
                 // log("challengeForm correct");
                 grade = getChoosenAnser();
             } else {
-                // log("challengeJudge incorrect");
+                // log("challengeForm incorrect");
                 grade = getFirstAnswerInFooter();
             }
             var ansText = grade.innerText;
@@ -1327,6 +1383,12 @@ function onChange(mutations) {
             }
             else if (/completeReverseTranslation/.test(newclass)) {
                 challengeComplete(challenge);
+            }
+            else if (/tapComplete/.test(newclass)) {
+                challengeTapComplete(challenge);
+            }
+            else if (/tapCloze/.test(newclass)) {
+                challengeTapCloze(challenge);
             }
             else if (/selectTranscription/.test(newclass)) {
                 log("selectTranscription");
