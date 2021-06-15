@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Duolingo Tree Enhancer
 // @namespace    https://github.com/camiloaa/duolingotreeenhancer
-// @version      1.3.2
+// @version      1.3.3
 // @description  Enhance Duolingo by customizing difficulty and providing extra functionality. Based on Guillaume Brunerie's ReverseTreeEnhancer
 // @author       Camilo Arboleda
 // @match        https://www.duolingo.com/*
@@ -320,36 +320,38 @@ function putInFlexbox(element, id = "enhancer-flexbox") {
 
 /* Audio functions */
 
-var audio;
+var audio = [];
+var utter = [];
+var synth;
 
 // Play an audio element.
 function playURL(url, lang, speaker_button) {
 
     // log("Playing URL " + url);
     var audio_id = "audio-userscript-cm-" + lang;
-    audio = document.getElementById(audio_id);
+    audio[lang] = document.getElementById(audio_id);
 
-    if (audio != null) {
+    if (audio[lang] != null) {
         // Delete audio element
         try {
-            audio.parentNode.removeChild(audio);
+            audio[lang].parentNode.removeChild(audio);
         } catch (err) {
             // Do nothing, I don't care
         }
     }
-    audio = document.createElement('audio');
-    audio.classList.add("enhancer-audio-class");
-    audio.setAttribute("id", audio_id);
-    audio.setAttribute("autoplay", "true");
+    audio[lang] = document.createElement('audio');
+    audio[lang].classList.add("enhancer-audio-class");
+    audio[lang].setAttribute("id", audio_id);
+    audio[lang].setAttribute("autoplay", "true");
     var source = document.createElement('source');
     source.setAttribute("type", "audio/mpeg");
     source.setAttribute("src", url);
-    audio.appendChild(source);
+    audio[lang].appendChild(source);
     var div = document.getElementById("empty-play-button-cm");
     if (div != null) {
         var play_button = document.createElement('div');
         play_button.style = K_SPEAKER_ICON_STYLE;
-        play_button.appendChild(audio);
+        play_button.appendChild(audio[lang]);
         var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         svg.setAttribute("width", "28");
         svg.setAttribute("height", "32");
@@ -370,12 +372,13 @@ function playURL(url, lang, speaker_button) {
         speaker_button.insertBefore(audio, document.body);
     }
 
-    audio.load();
+    audio[lang].load();
 }
 
 // play OS TTS
 function playTTS(url, lang, speaker_button) {
-    let synth = window.speechSynthesis;
+    // log("Web Speech in "+lang);
+    synth = window.speechSynthesis;
     let voices = window.speechSynthesis.getVoices();
     let voiceSelect;
     for (let i = 0; i < voices.length; i++) {
@@ -383,8 +386,8 @@ function playTTS(url, lang, speaker_button) {
             voiceSelect = i;
         }
     }
-    let utter = new SpeechSynthesisUtterance(url);
-    utter.voice = voices[voiceSelect];
+    utter[lang] = new SpeechSynthesisUtterance(url);
+    utter[lang].voice = voices[voiceSelect];
 
     var div = document.getElementById("empty-play-button-cm");
     if (div != null) {
@@ -403,12 +406,13 @@ function playTTS(url, lang, speaker_button) {
         ellipse.style = "fill:none;stroke:#EEEEEE;stroke-width:5;stroke-linecap:round";
         svg.appendChild(ellipse);
         play_button.appendChild(svg);
-        div.addEventListener('click',function(){synth.speak(utter);});
+        div.addEventListener('click',function(){synth.speak(utter[lang]);});
         div.removeAttribute("id"); // Make it anonymous
         div.appendChild(play_button);
     } else {
         speaker_button.insertBefore(audio, document.body);
     }
+    synth.speak(utter[lang]);
 }
 
 // Play a sentence using the first available TTS
@@ -451,10 +455,10 @@ function googleSay(sentence, lang, speaker_button) {
         return Math.floor(Math.random() * 1000000) + '|'
                 + Math.floor(Math.random() * 1000000)
     };
-    url = "http://translate.google.com/translate_tts?ie=UTF-8&tl="
+    url = "https://translate.google.com/translate_tts?ie=UTF-8&tl="
             + googleTTSLang(lang) + "&total=1&textlen=" + sentence.length
-            + "&tk=" + gRand() + "&q=" + encodeURIComponent(sentence)
-            + "&client=tw-ob";
+            + "&q=" + encodeURIComponent(sentence)
+            + "&client=tw-ob"+ "&tk=" + gRand();
     playURL(url, lang, speaker_button);
     return true;
 }
@@ -483,7 +487,7 @@ function yandexTTSLang(target) {
     case 'se': return 'sv_SE';
     case 'tr': return 'tr_TR';
     }
-    return undefined;
+    return lang;
 };
 
 function yandexSay(sentence, lang, speaker_button) {
@@ -505,16 +509,14 @@ function yandexSay(sentence, lang, speaker_button) {
 // Duolingo to Baidu language codes
 function baiduTTSLang(lang) {
     switch (lang) {
-    case 'en': return 'en'; // American English
-    case 'es': return 'es'; // Spanish
-    case 'pt': return 'pt'; // Portuguese
     case 'zs': return 'zh'; // Chinese
     }
-    return undefined;
+    return lang;
 };
 
 function baiduSay(sentence, lang, speaker_button) {
     var sayLang = baiduTTSLang(lang);
+    // log("Baidu " + sayLang + " " + lang);
     if (sayLang != undefined) {
         url = 'http://tts.baidu.com/text2audio?text='
                 + encodeURIComponent(sentence) + '&lan=' + sayLang
@@ -583,8 +585,23 @@ function say(itemToSay, lang, node, css) {
 }
 
 function keyUpHandler(e) {
-    if (e.altKey && e.ctrlKey && (e.keyCode == 75) && audio) {
-        audio.play();
+    let alt_lang = (lastSaidLang == sourceLang) ? targetLang: sourceLang;
+    if (e.altKey && e.ctrlKey && (e.keyCode == 75)) {
+        if (audio[lastSaidLang]) {
+            audio[lastSaidLang].play();
+        } else {
+            if (audio[alt_lang]) {
+                audio[alt_lang].play();
+            }
+        }
+        if (utter[lastSaidLang]) {
+            synth.speak(utter[lastSaidLang]);
+        } else {
+            if (utter[alt_lang]) {
+                synth.speak(utter[alt_lang]);
+            }
+        }
+        lastSaidLang = alt_lang;
     } else if (e.altKey && e.ctrlKey && (e.keyCode == 72)) {
         revealElements();
     } else {
@@ -1065,7 +1082,7 @@ function updateConfig() {
                 'label' : 'List of TTS services ',
                 'labelPos' : 'left',
                 'type' : 'text', // Makes this setting a text field
-                'default' : 'ostts google yandex baidu'
+                'default' : 'ostts google'
             },
         },
         full_css : [
@@ -1121,6 +1138,12 @@ function updateConfig() {
     GM_config = new GM_configStruct();
     GM_config.init(conf);
     sayFuncOrder = GM_config.get('TTS_ORDER').split(" ");
+    /* Make google happy, we have to be sure they know we are a normal user */
+    head = document.getElementsByTagName("head")[0];
+    meta=document.createElement("meta");
+    meta.name="referrer";
+    meta.content = "no-referrer";
+    head.appendChild(meta)
     try {
         log("Version " + GM_info.script.version
                 + " ready from " + duo_languages[sourceLang]
