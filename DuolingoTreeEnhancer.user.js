@@ -13,7 +13,7 @@
 // @grant        none
 // ==/UserScript==
 
-// log('DuolingoTreeEnhancer');
+//debug('DuolingoTreeEnhancer');
 
 const K_PLUGIN_NAME = "DuolingoTreeEnhancer";
 const K_CHALLENGE_JUDGE_QUESTION = "_3-JBe";
@@ -65,8 +65,13 @@ var _i = document.createElement('iframe');
 _i.style.display = 'none';
 document.body.appendChild(_i);
 console_alt = _i.contentWindow.console;
-function log(objectToLog) {
+
+function debug(objectToLog) {
 	console_alt.debug("[" + K_PLUGIN_NAME + "]: %o", objectToLog);
+}
+
+function info(objectToLog) {
+    console_alt.info("[" + K_PLUGIN_NAME + "]: %o", objectToLog);
 }
 
 Array.prototype.randomElement = function () {
@@ -210,7 +215,6 @@ function getLastAnswerInFooter() {
 function toStyleElem(css) {
     var style = document.createElement('style');
 
-    style.type = 'text/css';
     style.className = "enhancer-stylesheet";
     if (style.styleSheet) {
         style.styleSheet.cssText = css;
@@ -222,7 +226,7 @@ function toStyleElem(css) {
 }
 
 function addCSSHiding(css) {
-    // log("addCSSHiding: " + css);
+    //debug("addCSSHiding: " + css);
     var style = toStyleElem(css);
     document.head.appendChild(style);
 }
@@ -268,8 +272,8 @@ function revealElements() {
 function hideElements(elements, css) {
     // elements can be an array or an HTMLCollection
     // better use the old safe for cycle
-    // log("hideElements");
-    // log(elements);
+    //debug("hideElements");
+    //debug(elements);
     // Make the style dependent on parent. Important for multiple selection
     const parent_class = elements[0].parentElement.classList[0];
     const child_class = ["enhancer-hide-class", parent_class].filter(Boolean).join("-");
@@ -282,35 +286,35 @@ function hideElements(elements, css) {
             element.parentElement.style = "display:flex;";
         }
         });
-    // log("hidden elements: " + elements.length);
+    //debug("hidden elements: " + elements.length);
 }
 
 function hideTextElements(elements) {
-    // log("hideTextElements");
+    //debug("hideTextElements");
     hideElements(elements, css_style_hide_text);
 }
 
 function hidePicElements(elements) {
-    // log("hidePicElements");
+    //debug("hidePicElements");
     hideElements(elements, css_style_hide_pic);
 }
 
 /* Put an element inside a flexbox */
 function putInFlexbox(element, id = "enhancer-flexbox") {
     // Put everything inside a flexbox
-    // log("putInFlexbox");
-    // log(element);
+    //debug("putInFlexbox");
+    //debug(element);
     if (element.id == id) {
-        // log("Found myself!");
+        //debug("Found myself!");
         return element;
     }
     if (element.parentNode.id == id) {
-        // log("Found my parent!");
+        //debug("Found my parent!");
         return element.parentNode;
     }
     var flexbox = document.createElement("div");
     flexbox.style = "display: flex";
-    // log(element.parentNode);
+    //debug(element.parentNode);
     element.parentNode.insertBefore(flexbox, element);
     flexbox.appendChild(element);
     flexbox.id = id;
@@ -327,7 +331,7 @@ var synth;
 // Play an audio element.
 function playURL(url, lang, speaker_button) {
 
-    // log("Playing URL " + url);
+    debug("Playing URL " + url);
     var audio_id = "audio-userscript-cm-" + lang;
     audio[lang] = document.getElementById(audio_id);
 
@@ -377,7 +381,7 @@ function playURL(url, lang, speaker_button) {
 
 // play OS TTS
 function playTTS(url, lang, speaker_button) {
-    // log("Web Speech in "+lang);
+    //debug("Web Speech in "+lang);
     synth = window.speechSynthesis;
     let voices = window.speechSynthesis.getVoices();
     let voiceSelect;
@@ -420,7 +424,7 @@ function playSound(sentence, lang, speaker_button) {
     var url = "";
     for (i = 0; i < sayFuncOrder.length; i++) {
         try {
-            // log("playSound loop " + sayFuncOrder[i]);
+            //debug("playSound loop " + sayFuncOrder[i]);
             if (sayFunc[sayFuncOrder[i]](sentence, lang, speaker_button)) {
                 break;
             }
@@ -492,7 +496,7 @@ function yandexTTSLang(target) {
 
 function yandexSay(sentence, lang, speaker_button) {
     var sayLang = yandexTTSLang(lang);
-    // log("Yandex " + sayLang);
+    //debug("Yandex " + sayLang);
     if (sayLang != undefined) {
         url = 'http://tts.voicetech.yandex.net/tts?text='
                 + encodeURIComponent(sentence) + '&lang=' + sayLang
@@ -516,7 +520,7 @@ function baiduTTSLang(lang) {
 
 function baiduSay(sentence, lang, speaker_button) {
     var sayLang = baiduTTSLang(lang);
-    // log("Baidu " + sayLang + " " + lang);
+    //debug("Baidu " + sayLang + " " + lang);
     if (sayLang != undefined) {
         url = 'http://tts.baidu.com/text2audio?text='
                 + encodeURIComponent(sentence) + '&lan=' + sayLang
@@ -537,16 +541,16 @@ var sayFuncOrder = [ 'ostts', 'baidu', 'yandex', 'google', ];
 
 function insertNodeAfter(node, after) {
     if (after.nextSibling != null) {
-        // log("New play button after!");
+        //debug("New play button after!");
         after.parentNode.insertBefore(node, after.nextSibling);
     } else {
-        // log("New play button end!");
+        //debug("New play button end!");
         after.parentNode.appendChild(node);
     }
 }
 
 function insertNodeBefore(node, before) {
-    // log("New button before!");
+    //debug("New button before!");
     before.parentNode.insertBefore(node, before);
 }
 
@@ -557,7 +561,7 @@ function say(itemToSay, lang, node, css) {
     sentence = sentence.replace(/\.\./g, ".");
     sentence = sentence.replace(/\n/g," ");
 
-    log("Saying '" + sentence + "'");
+    info("Saying '" + sentence + "'");
 
     var div = document.createElement('button');
     div.className = K_SPEAKER_BUTTON + " enhancer-media-button";
@@ -614,7 +618,7 @@ document.addEventListener('keyup', keyUpHandler, false);
 
 /* Translation from target language (eg. Polish) */
 function challengeTranslate(challenge) {
-    // log("challengeTranslate");
+    //debug("challengeTranslate");
     var question_box = getTranslatePrompt();
     var answerbox = challenge.getElementsByTagName("textarea");
     var input_area = answerbox[0];
@@ -629,7 +633,7 @@ function challengeTranslate(challenge) {
             input_area.setAttribute("spellcheck", "true");
         }
     } else {
-        // log("Tapped exercise "+has_button+" "+has_enhancer_button);
+        //debug("Tapped exercise "+has_button+" "+has_enhancer_button);
         input_area = getTappedAnswer();
         if (!has_button || has_enhancer_button) {
             // Not sure how to figure out which language it is.
@@ -640,7 +644,7 @@ function challengeTranslate(challenge) {
         } else {
             lang = sourceLang;
         }
-        // log("Probably translating to: " + lang);
+        //debug("Probably translating to: " + lang);
     }
 
     if (lang == targetLang) {
@@ -651,16 +655,16 @@ function challengeTranslate(challenge) {
         answer = sourceLang;
     }
 
-    // log("challengeTranslate from "+question+" to "+answer);
+    //debug("challengeTranslate from "+question+" to "+answer);
     if (/answer/.test(activeClass)) {
-        // log("We have an answer");
+        //debug("We have an answer");
         input_area.disabled = false;
         revealElements();
         // Read the answer aloud if necessary
         if (/answer-correct/.test(activeClass)) { // Answer is right
             var grade = getFirstAnswerInFooter();
             if (grade == null) {
-                // log("perfect answer!")
+                //debug("perfect answer!")
                 grade = input_area;
             }
 
@@ -673,17 +677,17 @@ function challengeTranslate(challenge) {
     } else {
         // Read the question aloud if no TTS is available
         // We know there is not TTS because there is no play button
-        // log("Should we read the question?");
-        // log(question_hint);
+        //debug("Should we read the question?");
+        //debug(question_hint);
         if (isHideText(question)) {
             hideTextElements([question_hint]);
         }
         if (isSayText(question)) {
             if (!has_button) {
-                // log("Read the question aloud");
+                //debug("Read the question aloud");
                 say(question_hint, question);
             } else if (!has_enhancer_button) {
-                // log("just log the question");
+                //debug("just log the question");
                 say(question_hint); // No lang
             }
         }
@@ -707,30 +711,30 @@ function challengeSpeak(challenge) {
 
 /* Multiple-choice translation question */
 function challengeJudge(challenge) {
-    // log("challengeJudge");
+    //debug("challengeJudge");
     // HARDCODED CLASSNAME HERE -> ChallengeJudge doesn't have a "data-" hint
     var textCell = challenge.getElementsByClassName(K_CHALLENGE_JUDGE_QUESTION)[0];
 
     if (/answer/.test(activeClass)) {
-        // log("challengeJudge answer");
+        //debug("challengeJudge answer");
         revealElements();
         if (isSayText(targetLang)) {
             var selection_row = getChoiceBox();
             if (/answer-correct/.test(activeClass)) { // Answer is right
-                // log("challengeJudge correct");
+                //debug("challengeJudge correct");
                 grade = getChoosenAnser();
                 say(grade, targetLang, grade.parentElement);
             } else {
-                // log("challengeJudge incorrect");
+                //debug("challengeJudge incorrect");
                 sayAnswersInFooter(selection_row, targetLang);
             }
         }
     } else { // Asking a question
-        // log("challengeJudge question");
+        //debug("challengeJudge question");
 
         // Do we want to hide the target language?
         if (isHideTranslations()) {
-            // log("challengeJudge Hiding target");
+            //debug("challengeJudge Hiding target");
             const choices = Array.prototype.slice.call(getChoicesText());
             hideTextElements(choices);
         }
@@ -740,7 +744,7 @@ function challengeJudge(challenge) {
         }
 
         if (isSayText(sourceLang)) {
-            // log("challengeJudge: Sentence to translate");
+            //debug("challengeJudge: Sentence to translate");
             say(textCell, sourceLang);
         }
     }
@@ -748,7 +752,7 @@ function challengeJudge(challenge) {
 
 /* Type in a missing word */
 function challengeComplete(challenge) {
-    // log("challengeComplete");
+    //debug("challengeComplete");
     var question_hint = getHintSentence();
     var input_box = getInputBox();
 
@@ -756,9 +760,9 @@ function challengeComplete(challenge) {
         hideTextElements([question_hint]);
     }
 
-    // log("challengeTranslate from "+question+" to "+answer);
+    //debug("challengeTranslate from "+question+" to "+answer);
     if (/answer/.test(activeClass)) {
-        // log("We have an answer");
+        //debug("We have an answer");
         revealElements();
         if (isSayText(targetLang)) {
             // Read the answer aloud if necessary
@@ -768,12 +772,12 @@ function challengeComplete(challenge) {
             var answer_box = box_to_fix.parentNode;
             if (grade == null) {
                 // Make the whole answer a single text
-                // log("You were right");
+                //debug("You were right");
                 ansText = input_box.value;
                 box_to_fix.innerHTML = ansText;
                 say(answer_box, targetLang);
             } else {
-                // log("You made a mistake");
+                //debug("You made a mistake");
                 say(grade, targetLang);
             }
         }
@@ -792,21 +796,21 @@ function challengeComplete(challenge) {
 
 /* Tap missing words */
 function challengeTapComplete(challenge) {
-    //log("challengeTapComplete");
+    //debug("challengeTapComplete");
 
-    // log("challengeTapComplete from "+question+" to "+answer);
+    //debug("challengeTapComplete from "+question+" to "+answer);
     if (/answer/.test(activeClass)) {
-        //log("We have an answer");
+        //debug("We have an answer");
         revealElements();
         if (isSayText(targetLang)) {
             // Read the answer aloud if necessary
             var grade = getFirstAnswerInFooter();
             if (/answer-correct/.test(activeClass)) { // Answer is right
-                //log("You were right");
+                //debug("You were right");
                 var full_sentence = getHintSentence().parentNode;
                 say(full_sentence, targetLang);
             } else {
-                //log("You made a mistake");
+                //debug("You made a mistake");
                 say(grade, targetLang);
             }
         }
@@ -818,17 +822,17 @@ function challengeTapComplete(challenge) {
 
 /* Tap missing endings */
 function challengeTapCloze(challenge) {
-    //log("challengeTapCloze");
+    //debug("challengeTapCloze");
 
-    // log("challengeTapComplete from "+question+" to "+answer);
+    //debug("challengeTapComplete from "+question+" to "+answer);
     if (/answer/.test(activeClass)) {
-        //log("We have an answer");
+        //debug("We have an answer");
         revealElements();
         if (isSayText(targetLang)) {
             // Read the answer aloud if necessary
             var grade = getFirstAnswerInFooter();
             if (/answer-correct/.test(activeClass)) { // Answer is right
-                //log("You were right");
+                //debug("You were right");
                 var full_sentence = getHintSentence().parentNode;
                 var elements_to_remove = full_sentence.getElementsByClassName("_70ERZ");
                 for (var i = elements_to_remove.length - 1; i >= 0; i--) {
@@ -836,7 +840,7 @@ function challengeTapCloze(challenge) {
                 }
                 say(full_sentence, targetLang);
             } else {
-                //log("You made a mistake");
+                //debug("You made a mistake");
                 say(grade, targetLang);
             }
         }
@@ -848,11 +852,11 @@ function challengeTapCloze(challenge) {
 
 /* Select the correct image */
 function challengeSelect(challenge) {
-    // log("challengeSelect");
+    //debug("challengeSelect");
     if (/answer/.test(activeClass)) {
         revealElements();
     } else {
-        // log("challengeSelect question");
+        //debug("challengeSelect question");
         if (isHidePics()) {
             const choices = Array.prototype.slice.call(getCardChoices());
             const images = choices.map(choice => choice.nextElementSibling);
@@ -871,7 +875,7 @@ function challengeSelect(challenge) {
 
 /* Type the word corresponding to the images */
 function challengeName(challenge) {
-    // log("challengeName");
+    //debug("challengeName");
     if (/answer/.test(activeClass)) {
         revealElements();
     } else {
@@ -893,15 +897,15 @@ function challengeName(challenge) {
  * Choose the missing word in the sentence.
  */
 function challengeForm(challenge) {
-    // log("challengeForm");
+    //debug("challengeForm");
     if (/answer/.test(activeClass)) {
         if (isSayText(targetLang)) {
             var grade = null;
             if (/answer-correct/.test(activeClass)) { // Answer is right
-                // log("challengeForm correct");
+                //debug("challengeForm correct");
                 grade = getChoosenAnser();
             } else {
-                // log("challengeForm incorrect");
+                //debug("challengeForm incorrect");
                 grade = getFirstAnswerInFooter();
             }
             var ansText = grade.innerText;
@@ -917,15 +921,15 @@ function challengeForm(challenge) {
             }
         }
     } else {
-        // log("Challenge Form: nothing to read here");
+        //debug("Challenge Form: nothing to read here");
     }
 }
 
 function challengeListen(challenge) {
-    // log("challengeListen");
+    //debug("challengeListen");
     var input_box = challenge.getElementsByTagName("textarea")[0];
     if (/answer/.test(activeClass)) {
-        // log("Check if a translation is available");
+        //debug("Check if a translation is available");
         if (/correct/.test(activeClass)) {
             say(input_box);
         }
@@ -943,9 +947,9 @@ function sayAnswersInFooter(where = null, lang = sourceLang) {
     const first = lang == targetLang;
     const log_translation = first ? getLastAnswerInFooter() : getFirstAnswerInFooter();
     const say_translation = first ? getFirstAnswerInFooter() : getLastAnswerInFooter();
-    // log("sayAnswersInFooter " + first);
+    //debug("sayAnswersInFooter " + first);
     if (log_translation != say_translation) {
-        // log("Just log")
+        //debug("Just log")
         say(log_translation);
     }
 
@@ -980,7 +984,7 @@ function setUserConfig() {
         }
     }
 
-    // log("About to send config");
+    //debug("About to send config");
     http.send(params);
 }
 
@@ -1145,11 +1149,11 @@ function updateConfig() {
     meta.content = "no-referrer";
     head.appendChild(meta)
     try {
-        log("Version " + GM_info.script.version
+        info("Version " + GM_info.script.version
                 + " ready from " + duo_languages[sourceLang]
                 + " to " + duo_languages[targetLang]);
     } catch (err) {
-        log("Ready from " + duo_languages[sourceLang]
+        info("Ready from " + duo_languages[sourceLang]
                 + " to " + duo_languages[targetLang]);
     }
 };
@@ -1302,14 +1306,14 @@ function updateButton() {
 /* Check if mutations correspond to an answer */
 function isAnswer(mutations, challengeclass) {
     // By default, we get an empty collection here
-    // log("Do we have an answer? " + challengeclass)
+    //debug("Do we have an answer? " + challengeclass)
     for (let mutation of mutations) {
         if (mutation.type === 'childList') {
-            // log("Changes in childlist ");
-            // log(mutation.target);
+            //debug("Changes in childlist ");
+            //debug(mutation.target);
             var answer = getAnswerFooter();
             if (answer != null) {
-                // log("Yes! We have an answer");
+                //debug("Yes! We have an answer");
                 if(/answer/.test(challengeclass)) {
                     return challengeclass;
                 }
@@ -1320,17 +1324,17 @@ function isAnswer(mutations, challengeclass) {
             }
         } else {
             // var target = mutation.target;
-            // log("Changed no child class " + target.className);
+            //debug("Changed no child class " + target.className);
         }
     }
     return challengeclass;
 }
 
 function addButton() {
-    // log("addButton");
+    //debug("addButton");
     var tree = getDuoTree();
     if (tree == null) {
-        // log("Couldn't find a tree");
+        //debug("Couldn't find a tree");
         return; // Nothing to do here
     }
     var button = document.createElement("button");
@@ -1358,7 +1362,7 @@ function onChange(mutations) {
         newTargetLang = duoState.user.learningLanguage;
 
         if (newSourceLang != sourceLang || newTargetLang != targetLang) {
-            // log("Update duoState language change");
+            //debug("Update duoState language change");
             targetLang = duoState.user.learningLanguage;
             sourceLang = duoState.user.fromLanguage;
             updateConfig(); // Make GM_Config point to this language setup
@@ -1370,7 +1374,7 @@ function onChange(mutations) {
                 tree.removeChild(button);
         }
 
-        // log("Update duoState new window");
+        //debug("Update duoState new window");
         targetLang = duoState.user.learningLanguage;
         sourceLang = duoState.user.fromLanguage;
 
@@ -1383,10 +1387,10 @@ function onChange(mutations) {
     if (challenge != null) {
         newclass = challenge.getAttribute("data-test");
         newclass = isAnswer(mutations, newclass);
-        // log("Challenge: " + newclass);
+        //debug("Challenge: " + newclass);
 
         if (newclass != activeClass) {
-            // log("Old class: " + activeClass);
+            //debug("Old class: " + activeClass);
             activeClass = newclass;
 
             if (challenge == null) {
@@ -1414,7 +1418,7 @@ function onChange(mutations) {
                 challengeTapCloze(challenge);
             }
             else if (/selectTranscription/.test(newclass)) {
-                log("selectTranscription");
+                info("selectTranscription");
             }
             else if (/select/.test(newclass)) {
                 challengeSelect(challenge);
@@ -1441,5 +1445,5 @@ updateConfig();
 if (document.getElementById("reverse-tree-enhancer-button") == null) {
     addButton();
 } else {
-    // log("Not a tree");
+    //debug("Not a tree");
 }
