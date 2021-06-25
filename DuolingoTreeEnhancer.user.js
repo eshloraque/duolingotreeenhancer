@@ -328,6 +328,11 @@ var audio = [];
 var utter = [];
 var synth;
 
+// mute web audio
+function muteDuo() {
+	window.Howler._muted=true;
+}
+
 // Play an audio element.
 function playURL(url, lang, speaker_button) {
 
